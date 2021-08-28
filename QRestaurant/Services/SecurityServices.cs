@@ -1,4 +1,5 @@
-﻿using QRestaurantMain.Data;
+﻿using Microsoft.AspNetCore.Http;
+using QRestaurantMain.Data;
 using QRestaurantMain.Models;
 using QRestaurantMain.ViewModels;
 using System;
@@ -6,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace QRestaurantMain.Services
 {
@@ -18,19 +20,50 @@ namespace QRestaurantMain.Services
             AppDb = Db;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="email"> login email </param>
+        /// <param name="password"> login password </param>
+        /// <returns> 
+        ///     null -> incorrect email or password 
+        ///     array -> login succeeded [0] User Id / [1] User Name 
+        /// </returns>
         public string[] VerifyLogin(string email, string password)
         {
             string[] userdata = { "", "", "", "" };
-            UsersModel user = AppDb.Users.FirstOrDefault(x => x.Email == email && x.Password == GetHashString(password));
+            var user = AppDb.Users.FirstOrDefault(x => x.Email == email && x.Password == GetHashString(password));
             if(user != null)
             {
                 userdata[0] = user.Id;
                 userdata[1] = user.Name;
-                userdata[2] = user.Perms.ToString();
-                userdata[3] = user.CompanyId;
                 return userdata;
             }
             return null;
+        }
+
+        /// <summary>
+        ///  Change User Name
+        /// </summary>
+        /// <param name="userId"> User Id </param>
+        /// <param name="newName">  New User Name </param>
+        /// <returns> 
+        ///     false -> New UserName equal to current UserName
+        ///     true -> UserName changed with success
+        /// </returns>
+        public bool ChangeName(string userId, string newName)
+        {
+            var user = AppDb.Users.FirstOrDefault(x => x.Id == userId);
+            if(user != null)
+            {
+                if(user.Name != newName)
+                {
+                    user.Name = newName;
+                    AppDb.SaveChanges();
+                    return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>
@@ -38,9 +71,11 @@ namespace QRestaurantMain.Services
         /// </summary>
         /// <param name="userId"> User Id </param>
         /// <param name="newEmail"> New user Email </param>
-        public void ChangeEmail(string userId, string newEmail)
+        public bool ChangeEmail(string userId, string newEmail)
         {
             var user = AppDb.Users.FirstOrDefault(x => x.Id == userId);
+            if (user.Email == newEmail)
+                return false;
             string ConfirmationId = Guid.NewGuid().ToString();
             AppDb.UsersActions.Add(new UsersActionsModel
             {
@@ -52,8 +87,10 @@ namespace QRestaurantMain.Services
                 Data = newEmail
             });
             AppDb.SaveChanges();
+
             // --- Send Email ---
 
+            return true;
         }
 
         /// <summary>
@@ -61,23 +98,30 @@ namespace QRestaurantMain.Services
         /// </summary>
         /// <param name="Id"> Action Id </param>
         /// <returns> 
-        ///     False -> user not Found 
-        ///     True -> Email Confirmed with Sucess
+        ///     0 -> user or action not found
+        ///     1 -> Email Confirmed with Sucess / New user
+        ///     2 -> Email Confirmed with Sucess / Existing user
         /// </returns>
-        public Boolean ConfirmEmail(string Id)
+        public int ConfirmEmail(string id)
         {
-            var action = AppDb.UsersActions.FirstOrDefault(x => x.Id == Id);
+            var action = AppDb.UsersActions.FirstOrDefault(x => x.Id == id);
             if (action == null)
-                return false;
+                return 0;
             var user = AppDb.Users.FirstOrDefault(x => x.Id == action.UserId);
             if (user == null)
-                return false;
+                return 0;
             if(action.Data == null)
+            {
                 user.VerifiedEmail = true;
+                AppDb.UsersActions.Remove(action);
+                AppDb.SaveChanges();
+                return 1;
+            }
             else
                 user.Email = action.Data;
+            AppDb.UsersActions.Remove(action);
             AppDb.SaveChanges();
-            return true;
+            return 2;
         }
 
         /// <summary>
@@ -90,7 +134,7 @@ namespace QRestaurantMain.Services
         ///     False -> Actual password incorrect
         ///     True -> Password reseted with sucess
         /// </returns>
-        public Boolean ChangePassword(string userId, string actPwd ,string newPwd)
+        public bool ChangePassword(string userId, string actPwd ,string newPwd)
         {
             var user = AppDb.Users.FirstOrDefault(x => x.Id == userId);
             if (GetHashString(actPwd) != user.Password)
@@ -124,23 +168,23 @@ namespace QRestaurantMain.Services
         ///     False -> Users already is registed in the compan
         ///     True -> User Added with sucess
         /// </returns>
-        public Boolean AddUserToCompany(string Name, string Email, string CompanyId, string perms)
+        public bool AddUserToCompany(string name, string email, string companyId, string perms)
         {
-            UsersModel user = AppDb.Users.FirstOrDefault(x => x.Email == Email);
+            UsersModel user = AppDb.Users.FirstOrDefault(x => x.Email == email);
             if(user != null)
             {
                 if(user.CompanyId == "")
                 {
-                    user.CompanyId = CompanyId;
+                    user.CompanyId = companyId;
                     user.Perms = perms;
                     AppDb.SaveChanges();
                     return true;
                 }
                 Boolean flag = true;
                 string[] CompanyIdArr = user.CompanyId.Split(',');
-                for (int i = 0; i < CompanyId.Length; i++)
+                for (int i = 0; i < companyId.Length; i++)
                 {
-                    if(CompanyIdArr[i] == CompanyId)
+                    if(CompanyIdArr[i] == companyId)
                     {
                         flag = false;
                         break;
@@ -148,13 +192,25 @@ namespace QRestaurantMain.Services
                 }
                 if (!flag)
                     return false;
-                user.CompanyId += "," + CompanyId;
+                user.CompanyId += "," + companyId;
                 user.Perms += "," + perms;
                 AppDb.SaveChanges();
                 return true;
             }
             string generatedPwd = GeneratePassword();
-            AppDb.Users.Add(new UsersModel { Id = Guid.NewGuid().ToString(), Name = Name, CompanyId = CompanyId, Perms = perms, Email = Email, Password = GetHashString(generatedPwd), VerifiedEmail = false });
+            string userId = Guid.NewGuid().ToString();
+            AppDb.Users.Add(new UsersModel { Id = userId, Name = name, CompanyId = companyId, Perms = perms, Email = email, Password = GetHashString(generatedPwd), VerifiedEmail = false });
+            
+            string ConfirmationId = Guid.NewGuid().ToString();
+            AppDb.UsersActions.Add(new UsersActionsModel
+            {
+                Id = ConfirmationId,
+                UserId = userId,
+                Type = 0,
+                Date = DateTime.Now,
+                ExpDate = DateTime.Now.AddDays(20),
+                Data = null
+            });
             AppDb.SaveChanges();
 
             // --- SEND EMAIL -- 
@@ -168,42 +224,44 @@ namespace QRestaurantMain.Services
         /// <param name="UserId"></param>
         /// <param name="CompanyId"></param>
         /// <returns>
-        ///     False -> User not Found
-        ///     True -> User Removed from company with sucess
+        ///     0  -> Sucess user removed from the company
+        ///     -1 -> Error user or company not found
+        ///     -2 -> Error Current user id equals user to be removed 
+        ///     -3 -> Error is not possible remove the owner from the company 
         /// </returns>
-        public Boolean RemoveFromCompany(string UserId, string CompanyId)
+        public int RemoveFromCompany(string adminId, string userId, string companyId)
         {
-            UsersModel user = AppDb.Users.FirstOrDefault(x => x.Id == UserId);
+            if (adminId == userId)
+                return -2;
+            var user = AppDb.Users.FirstOrDefault(x => x.Id == userId);
             if (user == null)
-                return false;
-            string[] CompanyIdArr = user.CompanyId.Split(',');
-            if(CompanyIdArr.Length == 0)
+                return -1;
+            var company = AppDb.Company.FirstOrDefault(x => x.Id == companyId);
+            if (user == null)
+                return -1;
+            if (userId == company.Id)
+                return -3;
+            string[] companyIdArr = user.CompanyId.Split(',');
+            string[] companyPermsArr = user.Perms.Split(',');
+            if(companyIdArr.Length == 0)
             {
                 user.CompanyId = "";
                 user.Perms = "";
                 AppDb.SaveChanges();
-            }
-            int flag = 0;
-            for(int i= 0; i < CompanyIdArr.Length; i++)
-            {
-                if (CompanyIdArr[i] == CompanyId)
-                {
-                    flag = i;
-                    break;
-                }
+                return 0;
             }
             user.CompanyId = "";
-            for (int i = 0; i < CompanyIdArr.Length; i++)
+            user.Perms = "";
+            for (int i= 0; i < companyIdArr.Length; i++)
             {
-                if (i != flag)
+                if (companyIdArr[i] != companyId)
                 {
-                    user.CompanyId += CompanyIdArr[i];
-                    if (i + 1 < CompanyIdArr.Length)
-                        user.CompanyId += ",";
+                    user.CompanyId += companyIdArr[i] + ",";
+                    user.Perms += companyPermsArr[i] + ",";
                 }
             }
             AppDb.SaveChanges();
-            return true;
+            return 0;
         }
 
         /// <summary>
@@ -215,7 +273,7 @@ namespace QRestaurantMain.Services
         ///     False -> Incorrect current password
         ///     True -> Account Deleted with success
         /// </returns>
-        public Boolean DeleteUser(string UserId, string actPwd)
+        public bool DeleteUser(string UserId, string actPwd)
         {
             UsersModel user = AppDb.Users.FirstOrDefault(x => x.Id == UserId);
             if (user.Password != GetHashString(actPwd))
@@ -223,26 +281,6 @@ namespace QRestaurantMain.Services
             AppDb.Users.Remove(user);
             AppDb.SaveChanges();
             return true;
-        }
-
-        public List<CompanySelectorViewModel> UserCompanyList(string UserId)
-        {
-            List<CompanySelectorViewModel> model = new List<CompanySelectorViewModel>();
-            UsersModel user = AppDb.Users.FirstOrDefault(x => x.Id == UserId);
-            if(user == null || user.CompanyId == "")
-                return null;
-            string[] CompanyIdArr = user.CompanyId.Split(',');
-            for(int i = 0; i < CompanyIdArr.Length; i++)
-            {
-                CompanySelectorViewModel company = AppDb.Company.Select(s => new CompanySelectorViewModel 
-                { 
-                    Id = s.Id,
-                    CompanyName = s.CompanyName,
-                    CompanyLogo = s.CompanyLogoUrl
-                }).FirstOrDefault(x => x.Id == CompanyIdArr[i]);
-                model.Add(company);
-            }
-            return model;
         }
 
         public static string GeneratePassword()

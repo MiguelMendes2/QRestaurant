@@ -1,0 +1,175 @@
+﻿@model QRestaurantMain.Models.UsersModel
+
+@{
+    ViewData["Title"] = "EmployeeDetails";
+}
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>Empresa</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="index">Home</a></li>
+                    <li class="breadcrumb-item active">Empresa</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    <!-- /.container-fluid -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <h5 class="card-header">Detalhes Funcionário</h5>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <dl class="row">
+                            <dt class="col-sm-2">
+                                Nome:
+                            </dt>
+                            <dd class="col-sm-10">
+                                @Html.DisplayFor(model => model.Name)
+                            </dd>
+                            <dt class="col-sm-2">
+                                Email:
+                            </dt>
+                            <dd class="col-sm-10">
+                                @Html.DisplayFor(model => model.Email)
+                            </dd>
+                            <dt class="col-sm-2">
+                                Empresa:
+                            </dt>
+                            <dd class="col-sm-10">
+                                @Html.DisplayFor(model => model.CompanyId)
+                            </dd>
+                            <dt class="col-sm-2">
+                                Permissões:
+                            </dt>
+                            <dd class="col-sm-10">
+                                @Html.DisplayFor(model => model.Perms)
+                            </dd>
+                        </dl>
+                        <div class="row">
+                            <a asp-action="AltPermsEmployee" asp-route-id="@Model.Id"><i class="fas fa-edit"></i> Editar</a>
+                            <button class="btn btn-danger" type="button" id="RemoveBtn"><i class="fas fa-user-alt-slash"></i> Remover</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<form asp-action="RemoveEmployee" asp-route-Id="@Model.Id" method="post">
+    <div class="Confirm-reset" style="display:none;z-index:10000;" id="Confirm-reset">
+        <div class="container">
+            <div class="card-confirm card col-5 mr-auto ml-auto p-3 text-center">
+                <h3 class="">Remover Utilizador</h3>
+                <p>
+                    Têm a certeza que pretende remover o <strong>funcionário</strong> @Model.Name da plataforma?
+                </p>
+                <div class="row p-2">
+                    <div class="col-10 mr-auto ml-auto">
+                        <button id="CancelHdDiv" type="button" class="btn btn-primary">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Remover</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+    $("#CancelHdDiv").click(function () {
+        $("#Confirm-reset").hide();
+        $("body").css("overflow-y", "unset");
+    });
+
+    $("#RemoveBtn").click(function () {
+        $("#Confirm-reset").show();
+        $("body").css("overflow-y", "hidden");
+    });
+</script>
+<style>
+    html, body {
+        height: 100%;
+    }
+
+    .card-confirm {
+        margin-top: 20vh;
+    }
+
+    .Confirm-reset {
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        background-color: rgba(0,0,0,0.6);
+        top: 0;
+        left: 0;
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: green;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+    input:checked + .slider {
+        background-color: darkred;
+    }
+
+    input:focus + .slider {
+        box-shadow: 0 0 1px #2196F3;
+    }
+
+    input:checked + .slider:before {
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+    }
+
+    /* Rounded sliders */
+    .slider.round {
+        border-radius: 34px;
+    }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+</style>

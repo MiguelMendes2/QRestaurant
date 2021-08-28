@@ -23,19 +23,77 @@ namespace QRestaurantMain.Controllers
             securityServices = _securityServices;
         }
 
+        // GET - Login
+        [HttpGet]
+        public IActionResult Login()
+        {
+            if (TempData.ContainsKey("loginError"))
+                ViewBag.LoginError = TempData["loginError"].ToString();
+            return View();
+        }
+
+        // POST - Verify Login
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult VerifyLogin(LoginViewModel user)
+        {
+            if (user.email == null || user.password == null)
+            {
+                TempData["loginError"] = "Preencha todos os campos!";
+                return RedirectToAction("Login");
+            }
+            string[] verifyLogin = securityServices.VerifyLogin(user.email, user.password);
+            if (verifyLogin != null)
+            {
+                HttpContext.Session.SetString("Id", verifyLogin[0].ToString());
+                HttpContext.Session.SetString("Name", verifyLogin[1].ToString());
+                return RedirectToAction("index", "Home");
+            }
+            TempData["loginError"] = "O Email e/ou Password estão incorretos!";
+            return RedirectToAction("Login");
+        }
+
+        // GET - End Session
+        [HttpGet]
+        public IActionResult LogOut()
+        {
+            HttpContext.Session.Clear();
+            return RedirectToAction("Login");
+        }
+
         // GET - User Details
         [HttpGet]
         [LoginFilter]
         public IActionResult Index()
         {
             var userId = HttpContext.Session.GetString("Id");
-            if(userId == null)
+            var user = AppDb.Users.FirstOrDefault(x => x.Id == userId);
+            return View(user);
+        }
+
+        [HttpGet]
+        [LoginFilter]
+        public IActionResult Data()
+        {
+            var userId = HttpContext.Session.GetString("Id");
+            var user = AppDb.Users.FirstOrDefault(x => x.Id == userId);
+            ViewBag.actName = user.Name;
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [LoginFilter]
+        public IActionResult Data(string newName)
+        {
+            var userId = HttpContext.Session.GetString("Id");
+            if (securityServices.ChangeName(userId, newName))
             {
-                HttpContext.Session.Clear();
-                return RedirectToAction("Login");
+                TempData["AccountSucess"] = "Nome alterado com sucesso";
+                return RedirectToAction("Index");
             }
-            UsersModel model = AppDb.Users.FirstOrDefault(x => x.Id == userId);
-            return View(model);
+            ViewBag.altDataError = "O nome que introduzio é igual ao seu nome atual";
+            return View();
         }
 
         // GET - Change user Password
@@ -43,12 +101,6 @@ namespace QRestaurantMain.Controllers
         [LoginFilter]
         public IActionResult Password()
         {
-            var userId = HttpContext.Session.GetString("Id");
-            if (userId == null)
-            {
-                HttpContext.Session.Clear();
-                return RedirectToAction("Login");
-            }
             return View();
         }
 
@@ -56,25 +108,20 @@ namespace QRestaurantMain.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [LoginFilter]
-        public IActionResult Password(string ActPwd, string NewPwd, string Confpwd)
+        public IActionResult Password(string actPwd, string newPwd, string confPwd)
         {
-            if(NewPwd != Confpwd)
+            if(newPwd != confPwd)
             {
                 ViewBag.AltPwdError = "As passwords não coicidem!";
                 return View();
             }
-            if (NewPwd == ActPwd)
+            if (newPwd == actPwd)
             {
                 ViewBag.AltPwdError = "A nova password é igual á antiga!";
                 return View();
             }
             var userId = HttpContext.Session.GetString("Id");
-            if (userId == null)
-            {
-                HttpContext.Session.Clear();
-                return RedirectToAction("Login");
-            }
-            if (securityServices.ChangePassword(userId, ActPwd, NewPwd))
+            if (securityServices.ChangePassword(userId, actPwd, newPwd))
             {
                 TempData["AccountSucess"] = "Password Alterada com sucesso";
                 return RedirectToAction("index");
@@ -94,11 +141,6 @@ namespace QRestaurantMain.Controllers
         public IActionResult Email()
         {
             var userId = HttpContext.Session.GetString("Id");
-            if (userId == null)
-            {
-                HttpContext.Session.Clear();
-                return RedirectToAction("Login");
-            }
             var user = AppDb.Users.FirstOrDefault(x => x.Id == userId);
             ViewBag.ActEmail = user.Email;
             return View();
@@ -110,27 +152,24 @@ namespace QRestaurantMain.Controllers
         /// <param name="newEmail"> new User Email</param>
         /// <returns></returns>
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [LoginFilter]
         public IActionResult Email(string NewEmail, string ConfEmail)
         {
             var userId = HttpContext.Session.GetString("Id");
-            if (userId == null)
-            {
-                HttpContext.Session.Clear();
-                return RedirectToAction("Login");
-            }
-
             if(NewEmail != ConfEmail)
             {
                 ViewBag.AltEmailError = "Os campos não coicidem!";
                 return View();
             }
+            if(!securityServices.ChangeEmail(userId, NewEmail))
+            {
+                ViewBag.AltEmailError = "O email que introduzio é igual ao atual!";
+                return View();
+            }
 
-
-
-
-
-            return View();
+            TempData["AccountSucess"] = "Verifique o seu novo email para confirmar a alteração";
+            return RedirectToAction("index");
         }
 
         // GET - Request Email Confirmation
@@ -143,63 +182,19 @@ namespace QRestaurantMain.Controllers
 
         // GET - Email Confirmation
         [HttpGet]
-        [LoginFilter]
         public IActionResult ConfirmEmail(string? key)
         {
             if(key != null)
             {
-                if (securityServices.ConfirmEmail(key))
+                int result = securityServices.ConfirmEmail(key);
+                if (result != 0)
+                {
+                    ViewBag.ConfirmType = result;
+                    HttpContext.Session.Clear();
                     return View();
+                }
             }
             return NotFound();
-        }
-
-        [LoginFilter]
-        public IActionResult SelectCompany()
-        {
-            string UserId = HttpContext.Session.GetString("Id");
-            var model = securityServices.UserCompanyList(UserId);
-            return View(model);
-        }
-
-        // GET - Login
-        [HttpGet]
-        public IActionResult Login()
-        {
-            if (TempData.ContainsKey("loginError"))
-                ViewBag.LoginError = TempData["loginError"].ToString();
-            return View();
-        }
-
-        // POST - Verify Login
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult VerifyLogin(LoginViewModel user)
-        {
-            if(user.email == null || user.password == null)
-            {
-                TempData["loginError"] = "Preencha todos os campos!";
-                return RedirectToAction("Login");
-            }
-            string[] verifyLogin = securityServices.VerifyLogin(user.email, user.password);
-            if(verifyLogin != null)
-            {
-                HttpContext.Session.SetString("Id", verifyLogin[0].ToString());
-                HttpContext.Session.SetString("Name", verifyLogin[1].ToString());
-                HttpContext.Session.SetString("Perms", verifyLogin[2].ToString());
-                HttpContext.Session.SetString("CompanyId", verifyLogin[3].ToString());
-                return RedirectToAction("index", "Home");
-            }
-            TempData["loginError"] = "O Email e/ou Password estão incorretos!";
-            return RedirectToAction("Login");
-        }
-
-        // GET - End Session
-        [HttpGet]
-        public IActionResult LogOut()
-        {
-            HttpContext.Session.Clear();
-            return RedirectToAction("Login");
         }
     }
 }

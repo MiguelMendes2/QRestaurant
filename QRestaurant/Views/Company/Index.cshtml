@@ -1,0 +1,81 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>Home</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="index">Home</a></li>
+                    <li class="breadcrumb-item active">Empresa</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    <!-- /.container-fluid -->
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <h5 class="card-header">Empresa</h5>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-10 col-md-4 col-lg-3 mr-auto ml-auto mr-md-0 ml-md-0">
+                                <img class="w-100" src="https://www.mcdonalds.pt/media/3650/logotipo-mcdonalds-portugal.png?mode=pad" />
+                            </div>
+                            <div class="col-10 col-md-8 col-lg-9 mt-3 mr-auto ml-auto mt-md-0 mr-md-0 ml-md-0 d-table">
+                                <div style="display: table-cell; vertical-align: middle;">
+                                    <h3 class="mb-0">@ViewBag.companyName</h3>
+                                    <p>Proprietario - @ViewBag.ownerName</p>
+                                    <br />
+                                    <a asp-action="" class="btn btn-primary">
+                                        <i class="fas fa-edit"></i> Alterar
+                                    </a>
+                                </div>                                
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-12 col-sm-6 col-md-3">
+                                <a asp-action="Employees" class="btn btn-primary w-100 h-100 p-3">
+                                    <h2><i class="fas fa-users-cog"></i></h2>
+                                    <h3 class="text-center">Funcionarios</h3>
+                                </a>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-3">
+                                <a asp-action="ChangeSchedule" class="btn btn-primary w-100 h-100 p-3">
+                                    <h2><i class="fas fa-calendar-alt"></i></h2>
+                                    <h3 class="text-center">Horário</h3>
+                                </a>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-3">
+                                <a asp-action="Statistics" class="btn btn-primary w-100 h-100 p-3">
+                                    <h2><i class="fas fa-chart-line"></i></h2>
+                                    <h3 class="text-center">Estatísticas</h3>
+                                </a>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-3">
+                                <a asp-action="CompanyLogs" class="btn btn-primary w-100 h-100 p-3">
+                                    <h2><i class="fas fa-clipboard"></i></h2>
+                                    <h3 class="text-center">Registos</h3>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+

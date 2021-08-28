@@ -23,6 +23,8 @@ namespace QRestaurantMain.Data
 
         public DbSet<TablesModel> Tables { get; set; }
 
+        public DbSet<UsersRolesModel> UsersRoles { get; set; }
+
 
         // ----  Digital Menu  ----
 
@@ -32,9 +34,5 @@ namespace QRestaurantMain.Data
         public DbSet<SubCategoryModel> SubCategory { get; set; }
 
         public DbSet<ProductsModel> Products { get; set; }
-
-        public DbSet<QRestaurantMain.ViewModels.LoginViewModel> LoginViewModel { get; set; }
-
-        public DbSet<QRestaurantMain.ViewModels.CompanySelectorViewModel> CompanySelectorViewModel { get; set; }
     }
 }

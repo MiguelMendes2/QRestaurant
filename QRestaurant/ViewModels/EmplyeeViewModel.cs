@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,14 +9,13 @@ using System.Threading.Tasks;
 namespace QRestaurantMain.ViewModels
 {
     [NotMapped]
-    public class LoginViewModel
+    public class EmplyeeViewModel
     {
         [Key]
-        [Required(ErrorMessage = "Este campo é obrigatório!")]
-        public string email { get; set; }
+        public string userId { get; set; }
 
-        [Required(ErrorMessage = "Este campo é obrigatório!")]
-        public string password { get; set; }
+        public string userName { get; set; }
 
+        public string perms { get; set; }
     }
 }

@@ -1,7 +1,10 @@
 ﻿@using Microsoft.AspNetCore.Http;
 @{
-    var ControllerName = ViewContext.RouteData.Values["controller"]?.ToString();
-    var PageName = ViewContext.RouteData.Values["action"]?.ToString();
+    var controllerName = ViewContext.RouteData.Values["controller"]?.ToString();
+    var pageName = ViewContext.RouteData.Values["action"]?.ToString();
+    bool inCompany = false;
+    if (Context.Session.Get("Company") != null)
+        inCompany = true;
 }
 <!DOCTYPE html>
 <html lang="en" class="no-js">
@@ -23,6 +26,8 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <!-- Toastr -->
     <script src="~/lib/toastr/toastr.min.js"></script>
+    <!-- Bootstrap 4 -->
+    <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
     <header>
@@ -67,15 +72,47 @@
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                         <li class="nav-item">
-                            <a class="nav-link @(ControllerName == "Home" ? "active" : "")" asp-controller="Home" asp-action="Index" asp-route-Id="">
+                            <a class="nav-link @(controllerName == "Home" ? "active" : "")" asp-controller="Home" asp-action="Index" asp-route-Id="">
                                 <i class="nav-icon fas fa-home"></i>
                                 <p>
                                     Home
                                 </p>
                             </a>
                         </li>
-                        <li class="nav-item @(ControllerName == "Account" ? "menu-is-opening menu-open" : "")">
-                            <a href="#" class="nav-link @(ControllerName == "Account" ? "active" : "")">
+                        @if (inCompany == true)
+                        {
+                            <li class="nav-item @(controllerName == "Company" ? "menu-is-opening menu-open" : "")">
+                                <a href="#" class="nav-link @(controllerName == "Company" ? "active" : "")">
+                                    <i class="fas fa-building"></i>
+                                    <p>
+                                        Empresa
+                                        <i class="fas fa-angle-left right"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview">
+                                    <li class="nav-item">
+                                        <a class="nav-link @(controllerName == "Company" ? "active" : "")" asp-controller="Company" asp-action="index">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Home</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link @(pageName == "Employees" ? "active" : "")" asp-controller="Company" asp-action="Employees">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Funcionarios</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link @(pageName == "Employees" ? "active" : "")" asp-controller="Account" asp-action="LogOut">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Estatísticas</p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        <li class="nav-item @(controllerName == "Account" ? "menu-is-opening menu-open" : "")">
+                            <a href="#" class="nav-link @(controllerName == "Account" ? "active" : "")">
                                 <i class="nav-icon fas fa-user"></i>
                                 <p>
                                     Conta
@@ -84,9 +121,15 @@
                             </a>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <a class="nav-link @(ControllerName == "Account" ? "active" : "")" asp-controller="Account" asp-action="index">
+                                    <a class="nav-link @(controllerName == "Account" ? "active" : "")" asp-controller="Account" asp-action="index">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Informações</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Home" asp-action="ChangeCompany">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Alterar Empresa</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
@@ -118,48 +161,8 @@
         <!-- Control sidebar content goes here -->
     </aside>
     <!-- /.control-sidebar -->
-    <!-- Bootstrap 4 -->
-    <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <!-- DataTables  & Plugins -->
-    <script src="~/lib/datatables/jquery.dataTables.min.js"></script>
-    <script src="~/lib/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
-    <script src="~/lib/datatables-responsive/js/dataTables.responsive.min.js"></script>
-    <script src="~/lib/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
-    <script src="~/lib/datatables-buttons/js/dataTables.buttons.min.js"></script>
-    <script src="~/lib/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
-    <script src="~/lib/datatables-buttons/js/buttons.html5.min.js"></script>
-    <script src="~/lib/datatables-buttons/js/buttons.print.min.js"></script>
-    <script src="~/lib/datatables-buttons/js/buttons.colVis.min.js"></script>
     <!-- AdminLTE App -->
     <script src="~/js/adminlte.min.js"></script>
-    <script>
-        $(function () {
-            $('#ContentTable').DataTable({
-                "paging": true,
-                "lengthChange": true,
-                "searching": true,
-                "ordering": true,
-                "info": true,
-                "autoWidth": false,
-                "responsive": true,
-                "buttons": [
-                    'test'
-                ],
-                "language": {
-                    "lengthMenu": "Mostrando _MENU_ linhas por pagina",
-                    "zeroRecords": "Nada encontrado",
-                    "info": "pagina _PAGE_ de _PAGES_",
-                    "infoEmpty": "Nenhum registro disponível",
-                    "infoFiltered": "(filtrado de _MAX_ registros no total)",
-                    "search": "Pesquisa:",
-                    "paginate": {
-                        "next": "Próximo",
-                        "previous": "Anterior"
-                    }
-                }
-            });
-        });
-    </script>
-    @RenderSection("Scripts", required: false)
+    @RenderSection("Scripts", false)
 </body>
 </html>

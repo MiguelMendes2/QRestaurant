@@ -10,17 +10,14 @@ namespace QRestaurantMain.Services
 {
     public class PermsFilter : ActionFilterAttribute
     {
-        public int Role0 { get; set; }
-
+        public int Role { get; set; }
         public override void OnActionExecuting(ActionExecutingContext Context)
         {
-            var perms = Convert.ToInt32(Context.HttpContext.Session.GetString("Perms"));
-
-            if(Role0 != perms || Role0 > perms)
+            var perms = Context.HttpContext.Session.GetString("Perms").Split(',');
+            if(perms[Role] != "1")
             {
                 Context.Result = new UnauthorizedResult();
             }
-
         }
     }
 }

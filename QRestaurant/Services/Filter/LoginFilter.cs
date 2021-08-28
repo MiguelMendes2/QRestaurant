@@ -15,11 +15,8 @@ namespace QRestaurantMain.Services
         {
             var Id = context.HttpContext.Session.GetString("Id");
             var Name = context.HttpContext.Session.GetString("Name");
-            var Perms = context.HttpContext.Session.GetString("Perms");
-            var companyId = context.HttpContext.Session.GetString("CompanyId");
 
-            if(Id == null && Name == null && Perms == null && companyId == null)
-            {
+            if(Id == null && Name == null)
                 context.Result = new RedirectToRouteResult(
                     new RouteValueDictionary(
                         new
@@ -27,7 +24,6 @@ namespace QRestaurantMain.Services
                             controller = "Account",
                             action = "Login"
                         }));
-            }
         }
     }
 }

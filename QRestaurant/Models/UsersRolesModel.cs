@@ -1,5 +1,4 @@
-﻿using QRestaurantMain.ViewModels;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,25 +7,21 @@ using System.Threading.Tasks;
 
 namespace QRestaurantMain.Models
 {
-    public class CompanyModel
+    public class UsersRolesModel
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
         public string Id { get; set; }
 
         [Required]
-        public string LicenseId { get; set; }
+        public string RoleName { get; set; }
 
         [Required]
-        public string OwnerId { get; set; }
+        public string Perms { get; set; }
 
         [Required]
-        public string CompanyName { get; set; }
+        public string CompanyId { get; set; }
 
         [Required]
-        public string CompanyLogoUrl { get; set; }
-
-        public string CompanySchedule { get; set; }
-
-        public string CompanyEmployees { get; set; }
+        public string Zone { get; set; }
     }
 }

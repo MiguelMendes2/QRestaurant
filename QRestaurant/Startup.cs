@@ -30,7 +30,9 @@ namespace QRestaurant
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddScoped<ISecurityServices, SecurityServices>();
+            services.AddScoped<ICompanyService, CompanyService>();
             services.AddScoped<IMenuServices, MenuServices>();
+            
 
             services.AddDbContext<QRestaurantDbContext>(options =>
             options.UseSqlServer(

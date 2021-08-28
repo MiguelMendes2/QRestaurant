@@ -10,16 +10,18 @@ namespace QRestaurantMain.Services
     {
         public string[] VerifyLogin(string email, string password);
 
-        public void ChangeEmail(string userId, string newEmail);
+        public bool ChangeName(string userId, string newName);
 
-        public Boolean ConfirmEmail(string Id);
+        public bool ChangeEmail(string userId, string newEmail);
 
-        public Boolean ChangePassword(string userId, string actPwd, string newPwd);
+        public int ConfirmEmail(string Id);
 
-        public Boolean AddUserToCompany(string Name, string Email, string CompanyId, string perms);
+        public bool ChangePassword(string userId, string actPwd, string newPwd);
 
-        public Boolean RemoveFromCompany(string UserId, string CompanyId);
+        public bool AddUserToCompany(string name, string email, string companyId, string perms);
 
-        public List<CompanySelectorViewModel> UserCompanyList(string UserId);
+        public int RemoveFromCompany(string adminId,string userId, string companyId);
+
+        
     }
 }

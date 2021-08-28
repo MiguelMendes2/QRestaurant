@@ -1,6 +1,8 @@
-﻿@{
-    ViewData["Title"] = "Alterar Email";
+﻿
+@{
+    ViewData["Title"] = "Data";
 }
+
 <!-- Content Header (Page header) -->
 <section class="content-header">
     <div class="container-fluid">
@@ -25,27 +27,20 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <h5 class="card-header">Alterar Email</h5>
+                    <h5 class="card-header">Alterar Nome</h5>
                     <!-- /.card-header -->
                     <div class="card-body">
-                        <form method="post" asp-action="Email">
+                        <form method="post" asp-action="Data">
                             <div class="col-12 col-md-9">
                                 <div class="form-group">
-                                    <label for="ActPass">Novo Email:</label>
-                                    @Html.TextBox("NewEmail", ViewData["NewEmail"], new { @class = "form-control", @id = "NewEmail", @type = "text" })
-                                </div>
-                                <div class="form-group">
-                                    <label for="NewPass">Confirme o Email:</label>
-                                    @Html.TextBox("ConfEmail", ViewData["ConfEmail"], new { @class = "form-control", @id = "ConfEmail", @type = "text" })
+                                    <label for="ActPass">Novo nome:</label>
+                                    @Html.TextBox("newName", ViewData["newName"], new { @class = "form-control", @id = "newName", @type = "text" })
                                 </div>
                             </div>
-                            <p class="text-black-50">
-                                Email atual: @ViewBag.ActEmail
-                            </p>
                             <div class="row">
                                 <div class="ml-auto mr-1 mr-md-2 mr-lg-3">
                                     <a asp-action="index" class="btn btn-primary"><i class="fas fa-arrow-left"></i> Voltar</a>
-                                    <button type="submit" class="btn btn-success">Alterar Email <i class="fas fa-edit"></i></button>
+                                    <button type="submit" class="btn btn-success">Alterar Nome <i class="fas fa-edit"></i></button>
                                 </div>
                             </div>
                         </form>
@@ -55,11 +50,11 @@
         </div>
     </div>
 </section>
-@if (ViewBag.AltEmailError != null)
+@if (ViewBag.altDataError != null)
 {
     <script type="text/javascript">
         $(document).ready(function () {
-            toastr.error('@ViewBag.AltEmailError')
+            toastr.error('@ViewBag.altDataError')
         });
     </script>
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using QRestaurantMain.Data;
@@ -14,6 +15,7 @@ using System.Threading.Tasks;
 namespace QRestaurantMain.Controllers
 {
     [LoginFilter]
+    [Route("[Controller]")]
     public class HomeController : Controller
     {
         private readonly QRestaurantDbContext AppDb;
@@ -27,14 +29,14 @@ namespace QRestaurantMain.Controllers
 
         // GET - Home Page
         [CompanyFilter]
-        [LoginFilter]
+        [Route("/")]
         public IActionResult Index()
         {
             return View();
         }
 
         // GET - Select user Company
-        [LoginFilter]
+        [Route("/[action]")]
         public IActionResult SelectCompany()
         {
             var userId = HttpContext.Session.GetString("Id");
@@ -47,7 +49,7 @@ namespace QRestaurantMain.Controllers
         /// </summary>
         /// <param name="Id">Company Id</param>
         /// <returns> Home Page </returns>
-        [LoginFilter]
+        [Route("/[action]")]
         public IActionResult SelectedCompany(string? Id)
         {
             string userId = HttpContext.Session.GetString("Id");
@@ -57,7 +59,7 @@ namespace QRestaurantMain.Controllers
             return RedirectToAction("Index");
         }
 
-        [LoginFilter]
+        [Route("/[action]")]
         public IActionResult ChangeCompany()
         {
             HttpContext.Session.Remove("Company");

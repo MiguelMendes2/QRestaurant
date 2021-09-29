@@ -25,7 +25,7 @@ namespace QRestaurantMain.Services
         {
             AppDb.Category.Add(new CategoryModel 
             { 
-                Id = Guid.NewGuid().ToString(),
+                CategoryId = Guid.NewGuid().ToString(),
                 Name = Name, 
                 CompanyId = CompanyId 
             });
@@ -44,11 +44,11 @@ namespace QRestaurantMain.Services
         /// </returns>
         public Boolean NewSubCategory(string Name, string CompanyId, string CategoryId)
         {
-            if (AppDb.Category.FirstOrDefault(x => x.Id == CategoryId && x.CompanyId == CompanyId) == null)
+            if (AppDb.Category.FirstOrDefault(x => x.CategoryId == CategoryId && x.CompanyId == CompanyId) == null)
                 return false;
             AppDb.SubCategory.Add(new SubCategoryModel
             {
-                Id = Guid.NewGuid().ToString(),
+                SubCategoryId = Guid.NewGuid().ToString(),
                 Name = Name,
                 CategoryId = CategoryId,
                 CompanyId = CompanyId
@@ -71,13 +71,13 @@ namespace QRestaurantMain.Services
         ///     True -> Product Created with success
         /// </returns>
         public Boolean NewProduct(string Name, string CompanyId, string SubCategoryId, string Description, 
-            string AllergicWarn, string ImageUrl, string price)
+            string AllergicWarn, string ImageUrl, decimal price)
         {
-            if (AppDb.SubCategory.FirstOrDefault(x => x.Id == SubCategoryId && x.CompanyId == CompanyId) == null)
+            if (AppDb.SubCategory.FirstOrDefault(x => x.SubCategoryId == SubCategoryId && x.CompanyId == CompanyId) == null)
                 return false;
             AppDb.Products.Add(new ProductsModel
             {
-                Id = Guid.NewGuid().ToString(),
+                ProductsId = Guid.NewGuid().ToString(),
                 SubCategoryId = SubCategoryId,
                 CompanyId = CompanyId,
                 Name = Name,

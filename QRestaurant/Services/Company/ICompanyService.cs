@@ -20,5 +20,7 @@ namespace QRestaurantMain.Services
         public List<EmplyeeViewModel> GetCompanyEmployees(string companyId);
 
         public UsersModel GetEmployeeDetails(string userId, string companyId);
+
+        public bool NewUsersRole(string companyId, string roleName, RolePermsViewModel perms);
     }
 }

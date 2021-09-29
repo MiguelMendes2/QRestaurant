@@ -1,18 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace QRestaurantMain.Models
 {
     public class UsersActionsModel
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public string Id { get; set; }
+        public string UsersActionsId { get; set; }
 
         [Required]
+        [ForeignKey("Users")]
         public string UserId { get; set; }
 
         [Required]
@@ -26,5 +24,7 @@ namespace QRestaurantMain.Models
 
         [Required]
         public string Data { get; set; }
+
+        public UsersModel Users { get; set; }
     }
 }

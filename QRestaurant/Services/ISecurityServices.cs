@@ -18,7 +18,7 @@ namespace QRestaurantMain.Services
 
         public bool ChangePassword(string userId, string actPwd, string newPwd);
 
-        public bool AddUserToCompany(string name, string email, string companyId, string perms);
+        public bool AddUserToCompany(string email, string companyId, string roleId);
 
         public int RemoveFromCompany(string adminId,string userId, string companyId);
 

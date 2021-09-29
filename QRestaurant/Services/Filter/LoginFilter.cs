@@ -11,7 +11,7 @@ namespace QRestaurantMain.Services
 {
     public class LoginFilter : ActionFilterAttribute
     {
-        public override void OnActionExecuted(ActionExecutedContext context)
+        public override void OnActionExecuting(ActionExecutingContext context)
         {
             var Id = context.HttpContext.Session.GetString("Id");
             var Name = context.HttpContext.Session.GetString("Name");

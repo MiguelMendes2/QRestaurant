@@ -50,10 +50,10 @@
                                             @Html.DisplayFor(modelItem => item.perms)
                                         </td>
                                         <td>
-                                            <a asp-action="EmployeeDetails" asp-route-id="@item.userId" class="btn btn-sm btn-primary"><i class="fas fa-file-alt"></i> Details</a>
+                                            <a asp-action="Details" asp-route-id="@item.userId" class="btn btn-sm btn-primary"><i class="fas fa-file-alt"></i> Details</a>
                                         </td>
                                     </tr>
-                                }
+                                } 
                             </tbody>
                         </table>
                     </div>

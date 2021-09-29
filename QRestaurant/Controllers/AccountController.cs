@@ -25,6 +25,7 @@ namespace QRestaurantMain.Controllers
 
         // GET - Login
         [HttpGet]
+        [Route("Account/login")]
         public IActionResult Login()
         {
             if (TempData.ContainsKey("loginError"))
@@ -55,6 +56,7 @@ namespace QRestaurantMain.Controllers
 
         // GET - End Session
         [HttpGet]
+        [Route("Account/LogOut")]
         public IActionResult LogOut()
         {
             HttpContext.Session.Clear();
@@ -64,19 +66,21 @@ namespace QRestaurantMain.Controllers
         // GET - User Details
         [HttpGet]
         [LoginFilter]
+        [Route("Account/")]
         public IActionResult Index()
         {
             var userId = HttpContext.Session.GetString("Id");
-            var user = AppDb.Users.FirstOrDefault(x => x.Id == userId);
+            var user = AppDb.Users.FirstOrDefault(x => x.UserId == userId);
             return View(user);
         }
 
         [HttpGet]
         [LoginFilter]
+        [Route("Account/Data")]
         public IActionResult Data()
         {
             var userId = HttpContext.Session.GetString("Id");
-            var user = AppDb.Users.FirstOrDefault(x => x.Id == userId);
+            var user = AppDb.Users.FirstOrDefault(x => x.UserId == userId);
             ViewBag.actName = user.Name;
             return View();
         }
@@ -99,6 +103,7 @@ namespace QRestaurantMain.Controllers
         // GET - Change user Password
         [HttpGet]
         [LoginFilter]
+        [Route("Account/Password")]
         public IActionResult Password()
         {
             return View();
@@ -132,25 +137,19 @@ namespace QRestaurantMain.Controllers
 
         }
 
-        /// <summary>
-        ///     GET - Change Current Email
-        /// </summary>
-        /// <returns></returns>
+        // GET - Change Current Email
         [HttpGet]
         [LoginFilter]
+        [Route("Account/Email")]
         public IActionResult Email()
         {
             var userId = HttpContext.Session.GetString("Id");
-            var user = AppDb.Users.FirstOrDefault(x => x.Id == userId);
+            var user = AppDb.Users.FirstOrDefault(x => x.UserId == userId);
             ViewBag.ActEmail = user.Email;
             return View();
         }
-        
-        /// <summary>
-        ///     POST - Change Current Email
-        /// </summary>
-        /// <param name="newEmail"> new User Email</param>
-        /// <returns></returns>
+
+        // POST - Change Current Email
         [HttpPost]
         [ValidateAntiForgeryToken]
         [LoginFilter]
@@ -172,16 +171,9 @@ namespace QRestaurantMain.Controllers
             return RedirectToAction("index");
         }
 
-        // GET - Request Email Confirmation
-        [HttpGet]
-        [LoginFilter]
-        public IActionResult RequestEmailConfirmation()
-        {
-            return View();
-        }
-
         // GET - Email Confirmation
         [HttpGet]
+        [Route("Account/ConfirmEmail")]
         public IActionResult ConfirmEmail(string? key)
         {
             if(key != null)

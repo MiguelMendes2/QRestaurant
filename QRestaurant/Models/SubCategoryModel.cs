@@ -10,15 +10,21 @@ namespace QRestaurantMain.Models
     public class SubCategoryModel
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public string Id { get; set; }
+        public string SubCategoryId { get; set; }
 
         [Required]
-        public string CompanyId { get; set; }
+        [ForeignKey("Company")]
+        public string CompanyId { get; set; }     
 
         [Required]
+        [ForeignKey("Category")]
         public string CategoryId { get; set; }
 
         [Required]
         public string Name { get; set; }
+
+        public CompanyModel Company { get; set; }
+
+        public CategoryModel Category { get; set; }
     }
 }

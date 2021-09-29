@@ -2,21 +2,13 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace QRestaurantMain.Models
 {
     public class UsersModel
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public string Id { get; set; }
-
-        [Required]
-        public string CompanyId { get; set; }
-
-        [Required]
-        public string Perms { get; set; }
+        public string UserId { get; set; }
 
         [Required]
         public string Name { get; set; }
@@ -28,6 +20,10 @@ namespace QRestaurantMain.Models
         public string Password { get; set; }
 
         [Required]
-        public Boolean VerifiedEmail { get; set; }
+        public bool VerifiedEmail { get; set; }
+
+        public ICollection<UsersActionsModel> usersActions {  get; set; }
+
+        public ICollection<UsersCompanys> usersCompanys { get; set; }
     }
 }

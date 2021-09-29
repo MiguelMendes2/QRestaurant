@@ -35,7 +35,7 @@ namespace QRestaurantMain.Services
             var user = AppDb.Users.FirstOrDefault(x => x.Email == email && x.Password == GetHashString(password));
             if(user != null)
             {
-                userdata[0] = user.Id;
+                userdata[0] = user.UserId;
                 userdata[1] = user.Name;
                 return userdata;
             }
@@ -53,7 +53,7 @@ namespace QRestaurantMain.Services
         /// </returns>
         public bool ChangeName(string userId, string newName)
         {
-            var user = AppDb.Users.FirstOrDefault(x => x.Id == userId);
+            var user = AppDb.Users.FirstOrDefault(x => x.UserId == userId);
             if(user != null)
             {
                 if(user.Name != newName)
@@ -73,13 +73,13 @@ namespace QRestaurantMain.Services
         /// <param name="newEmail"> New user Email </param>
         public bool ChangeEmail(string userId, string newEmail)
         {
-            var user = AppDb.Users.FirstOrDefault(x => x.Id == userId);
+            var user = AppDb.Users.FirstOrDefault(x => x.UserId == userId);
             if (user.Email == newEmail)
                 return false;
             string ConfirmationId = Guid.NewGuid().ToString();
             AppDb.UsersActions.Add(new UsersActionsModel
             {
-                Id = ConfirmationId,
+                UsersActionsId = ConfirmationId,
                 UserId = userId,
                 Type = 0,
                 Date = DateTime.Now,
@@ -104,10 +104,10 @@ namespace QRestaurantMain.Services
         /// </returns>
         public int ConfirmEmail(string id)
         {
-            var action = AppDb.UsersActions.FirstOrDefault(x => x.Id == id);
+            var action = AppDb.UsersActions.FirstOrDefault(x => x.UsersActionsId == id);
             if (action == null)
                 return 0;
-            var user = AppDb.Users.FirstOrDefault(x => x.Id == action.UserId);
+            var user = AppDb.Users.FirstOrDefault(x => x.UserId == action.UserId);
             if (user == null)
                 return 0;
             if(action.Data == null)
@@ -136,7 +136,7 @@ namespace QRestaurantMain.Services
         /// </returns>
         public bool ChangePassword(string userId, string actPwd ,string newPwd)
         {
-            var user = AppDb.Users.FirstOrDefault(x => x.Id == userId);
+            var user = AppDb.Users.FirstOrDefault(x => x.UserId == userId);
             if (GetHashString(actPwd) != user.Password)
                 return false;
             user.Password = GetHashString(newPwd);
@@ -144,7 +144,7 @@ namespace QRestaurantMain.Services
             string RevoverId = Guid.NewGuid().ToString(); 
             AppDb.UsersActions.Add(new UsersActionsModel
             {
-                Id = RevoverId,
+                UsersActionsId = RevoverId,
                 UserId = userId,
                 Type = 0,
                 Date = DateTime.Now,
@@ -168,43 +168,42 @@ namespace QRestaurantMain.Services
         ///     False -> Users already is registed in the compan
         ///     True -> User Added with sucess
         /// </returns>
-        public bool AddUserToCompany(string name, string email, string companyId, string perms)
+        public bool AddUserToCompany(string email, string companyId, string roleId)
         {
             UsersModel user = AppDb.Users.FirstOrDefault(x => x.Email == email);
             if(user != null)
             {
-                if(user.CompanyId == "")
-                {
-                    user.CompanyId = companyId;
-                    user.Perms = perms;
-                    AppDb.SaveChanges();
-                    return true;
-                }
-                Boolean flag = true;
-                string[] CompanyIdArr = user.CompanyId.Split(',');
-                for (int i = 0; i < companyId.Length; i++)
-                {
-                    if(CompanyIdArr[i] == companyId)
-                    {
-                        flag = false;
-                        break;
-                    }
-                }
-                if (!flag)
-                    return false;
-                user.CompanyId += "," + companyId;
-                user.Perms += "," + perms;
+                AppDb.UsersCompany.Add(new UsersCompanys 
+                { CompanyId = companyId, 
+                    UserId = user.UserId, 
+                    RoleId = roleId 
+                });
                 AppDb.SaveChanges();
                 return true;
             }
+
             string generatedPwd = GeneratePassword();
             string userId = Guid.NewGuid().ToString();
-            AppDb.Users.Add(new UsersModel { Id = userId, Name = name, CompanyId = companyId, Perms = perms, Email = email, Password = GetHashString(generatedPwd), VerifiedEmail = false });
-            
+            AppDb.Users.Add(new UsersModel 
+            { 
+                UserId = userId, 
+                Name = "Utilizador",
+                Email = email, 
+                Password = GetHashString(generatedPwd), 
+                VerifiedEmail = false 
+            });
+
+            AppDb.UsersCompany.Add(new UsersCompanys
+            {
+                CompanyId= companyId,
+                UserId = userId,
+                RoleId = roleId
+            });
+
             string ConfirmationId = Guid.NewGuid().ToString();
             AppDb.UsersActions.Add(new UsersActionsModel
             {
-                Id = ConfirmationId,
+                UsersActionsId = ConfirmationId,
                 UserId = userId,
                 Type = 0,
                 Date = DateTime.Now,
@@ -233,33 +232,17 @@ namespace QRestaurantMain.Services
         {
             if (adminId == userId)
                 return -2;
-            var user = AppDb.Users.FirstOrDefault(x => x.Id == userId);
-            if (user == null)
+
+            var user = AppDb.Users.FirstOrDefault(x => x.UserId == userId);
+            var company = AppDb.Company.FirstOrDefault(x => x.CompanyId == companyId);
+
+            if (company == null || user == null)
                 return -1;
-            var company = AppDb.Company.FirstOrDefault(x => x.Id == companyId);
-            if (user == null)
-                return -1;
-            if (userId == company.Id)
+            if (userId == company.OwnerId)
                 return -3;
-            string[] companyIdArr = user.CompanyId.Split(',');
-            string[] companyPermsArr = user.Perms.Split(',');
-            if(companyIdArr.Length == 0)
-            {
-                user.CompanyId = "";
-                user.Perms = "";
-                AppDb.SaveChanges();
-                return 0;
-            }
-            user.CompanyId = "";
-            user.Perms = "";
-            for (int i= 0; i < companyIdArr.Length; i++)
-            {
-                if (companyIdArr[i] != companyId)
-                {
-                    user.CompanyId += companyIdArr[i] + ",";
-                    user.Perms += companyPermsArr[i] + ",";
-                }
-            }
+
+            var userCompany = AppDb.UsersCompany.FirstOrDefault(x => x.UserId == userId && x.CompanyId == company.CompanyId);
+            AppDb.UsersCompany.Remove(userCompany);
             AppDb.SaveChanges();
             return 0;
         }
@@ -275,7 +258,7 @@ namespace QRestaurantMain.Services
         /// </returns>
         public bool DeleteUser(string UserId, string actPwd)
         {
-            UsersModel user = AppDb.Users.FirstOrDefault(x => x.Id == UserId);
+            UsersModel user = AppDb.Users.FirstOrDefault(x => x.UserId == UserId);
             if (user.Password != GetHashString(actPwd))
                 return false;
             AppDb.Users.Remove(user);

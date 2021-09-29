@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -47,6 +48,14 @@ namespace QRestaurant
                 options.Cookie.IsEssential = true;
             });
 
+            services.Configure<RazorViewEngineOptions>(options =>
+            {
+                options.AreaViewLocationFormats.Clear();
+                options.AreaViewLocationFormats.Add("/Views/{1}/{0}.cshtml");
+                options.AreaViewLocationFormats.Add("/Views/{2}/{1}/{0}.cshtml");
+                options.AreaViewLocationFormats.Add("/Views/Shared/{0}.cshtml");
+            });
+
             services.AddControllersWithViews();
         }
 
@@ -74,9 +83,13 @@ namespace QRestaurant
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapRazorPages();
+                endpoints.MapControllerRoute("areas", "{area:exists}/{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
+                
+
             });
         }
     }

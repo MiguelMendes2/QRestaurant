@@ -1,4 +1,5 @@
 ﻿using QRestaurantMain.Data;
+using QRestaurantMain.Models;
 using QRestaurantMain.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -23,10 +24,10 @@ namespace QRestaurantMain.Services
         /// <returns> Tabled Id  </returns>
         public string VerifyOrder(string ApiKey)
         {
-            var table = AppDb.Tables.FirstOrDefault(x => x.API_KEY == ApiKey);
+            var table = AppDb.Tables.FirstOrDefault(x => x.APIKEY == ApiKey);
             if (table == null)
                 return null;
-            return table.Id;
+            return table.TablesId;
         }
 
         /// <summary>
@@ -35,22 +36,13 @@ namespace QRestaurantMain.Services
         /// <param name="orderlist"></param>
         /// <param name="tableId"></param>
         /// <returns> False -> Table Not Available, True -> Sucess </returns>
-        public Boolean NewOrder(List<OrderViewModel> orderlist, string tableId)
+        public Boolean NewOrder(List<OrderViewModel> orderlist, string APIKEY)
         {
-            var table = AppDb.Tables.FirstOrDefault(x => x.Id == tableId);
-            if (table.State != 0)
-                return false;
-            table.State = 1;
-            for (int i = 0; i < orderlist.Count(); i++)
-            {
-                if (table.Pedido == "")
-                    table.Pedido += ",";
-                table.Pedido += orderlist[i].ProductId + ",";
-                table.Pedido += orderlist[i].Delivered;
-                if (i + 1 < orderlist.Count())
-                    table.Pedido += ",";
-            }
+            var table = AppDb.Tables.FirstOrDefault(x => x.APIKEY == APIKEY);
+            QRCodesModel qrcode = new QRCodesModel { APIKEY = APIKEY, TableId = table.TablesId };
+            AppDb.QRCodes.Add(qrcode);
             AppDb.SaveChanges();
+            AppDb.Orders.Add(new Models.OrdersModel { QRCodesId = qrcode.QRCodesId, Date = DateTime.Now, Products = string.Join(",", orderlist) });
             return true;
         }
 
@@ -60,20 +52,13 @@ namespace QRestaurantMain.Services
         /// <param name="orderlist"> Edited Order </param>
         /// <param name="tableId"> Table Id </param>
         /// <returns> False -> Table Not Available, True -> Sucess </returns>
-        public Boolean EditOrder(List<OrderViewModel> orderlist, string tableId)
+        public Boolean EditOrder(List<OrderViewModel> orderlist,string tableId, string APIKEY)
         {
-            var table = AppDb.Tables.FirstOrDefault(x => x.Id == tableId);
-            if (table == null)
+            var qrCode = AppDb.QRCodes.FirstOrDefault(x => x.TableId == tableId && x.APIKEY == APIKEY);
+            if (qrCode == null)
                 return false;
-            table.Pedido = "";
-            for (int i = 0; i < orderlist.Count(); i++)
-            {
-                table.Pedido += orderlist[i].ProductId + ",";
-                table.Pedido += orderlist[i].Delivered;
-                if (i + 1 < orderlist.Count())
-                    table.Pedido += ",";
-            }
-            AppDb.SaveChanges();
+            var order = AppDb.Orders.FirstOrDefault(x => x.QRCodesId == qrCode.QRCodesId);
+            
             return true;
         }
 
@@ -82,13 +67,13 @@ namespace QRestaurantMain.Services
         /// </summary>
         /// <param name="tableId"></param>
         /// <returns> False -> Table Not Available, True -> Sucess </returns>
-        public Boolean CheckOutTable(string tableId)
+        public Boolean CheckOutTable(string tableId, string APIKEY)
         {
-            var table = AppDb.Tables.FirstOrDefault(x => x.Id == tableId);
-            if (table == null)
+            var table = AppDb.Tables.FirstOrDefault(x => x.TablesId == tableId && x.APIKEY == APIKEY);
+            if ( table == null)
                 return false;
             table.State = 0;
-            table.Pedido = "";
+            table.APIKEY = Guid.NewGuid().ToString();
             AppDb.SaveChanges();
             return true;
         }
@@ -98,21 +83,14 @@ namespace QRestaurantMain.Services
         /// </summary>
         /// <param name="tableId"> TableId </param>
         /// <param name="productsId"> Array Delivered Products Id </param>
-        public void DeliverProduct(string tableId, string[] productsId)
+        public void DeliverProduct(string APIKEY,string tableId, string[] productsId)
         {
-            var table = AppDb.Tables.FirstOrDefault(x => x.Id == tableId);
-            string[] ordersplited = table.Pedido.Split(',');
-            for(int i = 0; i < productsId.Length; i++)
-            {
-                for (int j = 0; i < ordersplited.Length; j+=2)
-                {
-                    if(productsId[i] == ordersplited[j])
-                    {
-                        ordersplited[j+1] = "1";
-                        break;
-                    }
-                }
-            }
+            var qrcode = AppDb.QRCodes.FirstOrDefault(x => x.TableId == tableId && x.APIKEY == APIKEY);
+            if (qrcode == null)
+                return;
+            var order = AppDb.Orders.FirstOrDefault(x => x.QRCodesId == qrcode.QRCodesId);
+            if (qrcode == null)
+                return;
         }
     }
 }

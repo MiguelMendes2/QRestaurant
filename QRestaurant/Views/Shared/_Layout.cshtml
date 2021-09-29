@@ -72,7 +72,7 @@
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                         <li class="nav-item">
-                            <a class="nav-link @(controllerName == "Home" ? "active" : "")" asp-controller="Home" asp-action="Index" asp-route-Id="">
+                            <a class="nav-link @(controllerName == "Home" ? "active" : "")" asp-area="" asp-controller="Home" asp-action="Index" asp-route-Id="">
                                 <i class="nav-icon fas fa-home"></i>
                                 <p>
                                     Home
@@ -91,19 +91,19 @@
                                 </a>
                                 <ul class="nav nav-treeview">
                                     <li class="nav-item">
-                                        <a class="nav-link @(controllerName == "Company" ? "active" : "")" asp-controller="Company" asp-action="index">
+                                        <a class="nav-link @(controllerName == "Company" && pageName == "" ? "active" : "" )" asp-area="" asp-controller="Company" asp-action="index">
                                             <i class="far fa-circle nav-icon"></i>
                                             <p>Home</p>
                                         </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link @(pageName == "Employees" ? "active" : "")" asp-controller="Company" asp-action="Employees">
+                                        <a class="nav-link @(pageName == "Employees" ? "active" : "")" asp-area="Company" asp-controller="Employees" asp-action="index">
                                             <i class="far fa-circle nav-icon"></i>
                                             <p>Funcionarios</p>
                                         </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link @(pageName == "Employees" ? "active" : "")" asp-controller="Account" asp-action="LogOut">
+                                        <a class="nav-link @(pageName == "Statistics" ? "active" : "")" asp-area="" asp-controller="Account" asp-action="Statistics">
                                             <i class="far fa-circle nav-icon"></i>
                                             <p>Estatísticas</p>
                                         </a>
@@ -121,7 +121,7 @@
                             </a>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <a class="nav-link @(controllerName == "Account" ? "active" : "")" asp-controller="Account" asp-action="index">
+                                    <a class="nav-link @(controllerName == "Account" ? "active" : "")" asp-area="" asp-controller="Account" asp-action="index">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Informações</p>
                                     </a>

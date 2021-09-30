@@ -43,21 +43,9 @@
                             <dd class="col-sm-10">
                                 @Html.DisplayFor(model => model.Email)
                             </dd>
-                            <dt class="col-sm-2">
-                                Empresa:
-                            </dt>
-                            <dd class="col-sm-10">
-                                @Html.DisplayFor(model => model.CompanyId)
-                            </dd>
-                            <dt class="col-sm-2">
-                                Permissões:
-                            </dt>
-                            <dd class="col-sm-10">
-                                @Html.DisplayFor(model => model.Perms)
-                            </dd>
                         </dl>
                         <div class="row">
-                            <a asp-action="AltPermsEmployee" asp-route-id="@Model.Id"><i class="fas fa-edit"></i> Editar</a>
+                            <a asp-action="AltPermsEmployee" asp-route-id="@Model.UserId"><i class="fas fa-edit"></i> Editar</a>
                             <button class="btn btn-danger" type="button" id="RemoveBtn"><i class="fas fa-user-alt-slash"></i> Remover</button>
                         </div>
                     </div>
@@ -66,7 +54,7 @@
         </div>
     </div>
 </section>
-<form asp-action="RemoveEmployee" asp-route-Id="@Model.Id" method="post">
+<form asp-action="RemoveEmployee" asp-route-Id="@Model.UserId" method="post">
     <div class="Confirm-reset" style="display:none;z-index:10000;" id="Confirm-reset">
         <div class="container">
             <div class="card-confirm card col-5 mr-auto ml-auto p-3 text-center">
